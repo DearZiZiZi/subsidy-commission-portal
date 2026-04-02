@@ -28,6 +28,9 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# large CSV source data (generated .ts is committed instead)
+/data/*.csv
+
 # vercel
 .vercel
 

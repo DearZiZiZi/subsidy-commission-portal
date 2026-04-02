@@ -3,25 +3,60 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --navy-950: #0a0f1e;
+  --navy-900: #0d1530;
+  --navy-800: #111d42;
+  --navy-700: #1a2a5e;
+  --navy-600: #1e3a8a;
+  --gold-400: #fbbf24;
+  --gold-500: #f59e0b;
+  --gold-600: #d97706;
+  --slate-400: #94a3b8;
+  --slate-300: #cbd5e1;
+  --green-500: #22c55e;
+  --yellow-500: #eab308;
+  --orange-500: #f97316;
+  --red-500: #ef4444;
+  --background: #f1f5f9;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --muted: #64748b;
+  --accent: #fef3c7;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: var(--navy-950);
+  --foreground: var(--slate-300);
+  --card: var(--navy-900);
+  --card-foreground: var(--slate-300);
+  --border: var(--navy-700);
+  --muted: var(--slate-400);
+  --accent: rgba(245, 158, 11, 0.12);
+}
+
+* {
+  border-color: var(--border);
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.font-mono-data {
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Focus rings for keyboard nav */
+:focus-visible {
+  @apply outline-none ring-2 ring-gold-500 ring-offset-2 ring-offset-[var(--background)];
 }
