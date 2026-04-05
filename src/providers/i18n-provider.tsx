@@ -19,15 +19,25 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-const STORAGE_KEY = "subsidy-portal-lang";
+const STORAGE_KEY = "lang";
+const LEGACY_STORAGE_KEY = "subsidy-portal-lang";
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("ru");
 
   useEffect(() => {
     try {
-      const s = localStorage.getItem(STORAGE_KEY);
-      if (s === "kk" || s === "ru") setLangState(s);
+      let s = localStorage.getItem(STORAGE_KEY);
+      if (s !== "kk" && s !== "ru") {
+        s = localStorage.getItem(LEGACY_STORAGE_KEY);
+        if (s === "kk" || s === "ru") {
+          localStorage.setItem(STORAGE_KEY, s);
+        }
+      }
+      if (s === "kk" || s === "ru") {
+        setLangState(s);
+        document.documentElement.lang = s === "kk" ? "kk" : "ru";
+      }
     } catch {
       /* ignore */
     }
@@ -38,6 +48,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(STORAGE_KEY, l);
+        document.documentElement.lang = l === "kk" ? "kk" : "ru";
       } catch {
         /* ignore */
       }
@@ -64,3 +75,6 @@ export function useI18n(): I18nContextValue {
   if (!ctx) throw new Error("useI18n must be used within I18nProvider");
   return ctx;
 }
+
+/** Alias for judging brief / hooks naming. */
+export const useLanguage = useI18n;

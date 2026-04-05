@@ -14,17 +14,25 @@ import type { ApplicantPortfolioRow } from "@/types/scoring";
 import { formatKZT, formatScoreOneDecimal, getTier } from "@/lib/score-utils";
 import { ScoreTierBadge } from "@/components/scoring/ScoreTierBadge";
 import { ComponentSparkBars } from "@/components/scoring/ComponentBreakdown";
-import { ApplicationExpandPanel } from "@/components/shortlist/ApplicationRow";
+import { ShortlistBreakdownPanel } from "@/components/shortlist/ShortlistBreakdownPanel";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import type { Lang } from "@/lib/i18n-dict";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { useI18n } from "@/providers/i18n-provider";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Flag,
+  HelpCircle,
+  Plus,
+} from "lucide-react";
 
 const PAGE_SIZE = 50;
 
 export function ShortlistTable({
   rows,
-  lang,
   shortlistIds,
   onAdd,
   onRemoveByApplicantId,
@@ -32,13 +40,13 @@ export function ShortlistTable({
   manualReviewIds,
 }: {
   rows: ApplicantPortfolioRow[];
-  lang: Lang;
   shortlistIds: Set<string>;
   onAdd: (row: ApplicantPortfolioRow) => void;
   onRemoveByApplicantId: (applicant_id: string) => void;
   onToggleManualReview: (applicant_id: string) => void;
   manualReviewIds: Set<string>;
 }) {
+  const { t } = useI18n();
   const [sorting, setSorting] = useState<SortingState>([
     { id: "final_score_100", desc: true },
   ]);
@@ -51,102 +59,123 @@ export function ShortlistTable({
         id: "rank",
         header: "#",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-muted">
+          <span className="font-mono text-xs text-muted-fg">
             {row.index + 1 + pagination.pageIndex * PAGE_SIZE}
           </span>
         ),
       },
       {
         accessorKey: "applicant_id",
-        header: "ID",
+        header: t("col_id"),
         cell: ({ getValue }) => (
           <span className="font-mono text-xs">{String(getValue())}</span>
         ),
       },
       {
         accessorKey: "direction",
-        header: "Направление",
+        header: t("col_direction"),
         cell: ({ getValue }) => (
           <span className="max-w-[200px] truncate text-xs">{String(getValue())}</span>
         ),
       },
       {
         accessorKey: "region",
-        header: "Область",
+        header: t("col_region"),
       },
       {
         accessorKey: "requested_amount",
-        header: "Сумма",
+        header: t("col_sum"),
         cell: ({ getValue }) => (
-          <span className="font-mono text-xs">
-            {formatKZT(Number(getValue()))}
-          </span>
+          <span className="font-mono text-xs">{formatKZT(Number(getValue()))}</span>
         ),
       },
       {
         accessorKey: "final_score_100",
-        header: "Балл",
+        header: t("col_score"),
         cell: ({ getValue }) => (
-          <span className="font-mono">{formatScoreOneDecimal(Number(getValue()))}</span>
+          <span className="font-bold tabular-nums tracking-tight text-ios-purple">
+            {formatScoreOneDecimal(Number(getValue()))}
+          </span>
         ),
       },
       {
         id: "tier",
-        header: "Уровень",
-        cell: ({ row }) => (
-          <ScoreTierBadge score={row.original.final_score_100} lang={lang} />
-        ),
+        header: t("col_tier"),
+        cell: ({ row }) => <ScoreTierBadge score={row.original.final_score_100} />,
       },
       {
         id: "radar",
-        header: "Компоненты",
+        header: () => (
+          <span className="inline-flex items-center gap-1">
+            {t("col_breakdown")}
+            <span title={t("breakdown_help")} className="text-muted-fg">
+              <HelpCircle className="h-3.5 w-3.5" aria-hidden />
+            </span>
+          </span>
+        ),
         cell: ({ row }) => (
           <ComponentSparkBars breakdown={row.original.component_breakdown} />
         ),
       },
       {
         id: "rec",
-        header: "Реком.",
+        header: t("recommendation"),
         cell: ({ row }) => {
-          const t = getTier(row.original.final_score_100);
-          const ok = t === "recommended" || t === "review";
-          return <span className="font-mono text-xs">{ok ? "YES" : "NO"}</span>;
+          const tier = getTier(row.original.final_score_100);
+          const ok = tier === "recommended" || tier === "review";
+          return (
+            <span className="font-mono text-xs text-muted-fg">
+              {ok ? t("yes") : t("no")}
+            </span>
+          );
         },
       },
       {
         id: "actions",
-        header: "Действия",
+        header: t("actions"),
         cell: ({ row }) => {
           const id = row.original.applicant_id;
           const inList = shortlistIds.has(id);
           const rev = manualReviewIds.has(id);
           const isOpen = expanded[id] ?? false;
           return (
-            <div className="flex flex-wrap gap-1">
-              <Button
-                size="sm"
-                variant="ghost"
+            <div
+              className="flex flex-wrap items-center gap-1.5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
                 type="button"
-                onClick={() =>
-                  setExpanded((e) => ({ ...e, [id]: !e[id] }))
-                }
+                className="inline-flex items-center gap-1 text-xs font-medium text-ios-blue hover:underline"
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  setExpanded((e) => ({ ...e, [id]: !e[id] }));
+                }}
               >
+                {t("shortlist_more")}
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 transition-transform",
+                    "h-4 w-4 shrink-0 transition-transform",
                     isOpen && "rotate-180"
                   )}
                 />
-              </Button>
+              </button>
               {!inList ? (
-                <Button size="sm" variant="secondary" type="button" onClick={() => onAdd(row.original)}>
-                  +
+                <Button
+                  size="sm"
+                  variant="primary"
+                  type="button"
+                  className="h-8 gap-1 rounded-[10px] px-3 text-xs sm:inline-flex"
+                  onClick={() => onAdd(row.original)}
+                >
+                  <Plus className="h-3.5 w-3.5 sm:hidden" />
+                  <span className="hidden sm:inline">＋ {t("btn_add_shortlist")}</span>
                 </Button>
               ) : (
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="secondary"
                   type="button"
+                  className="h-8 text-xs"
                   onClick={() => onRemoveByApplicantId(id)}
                 >
                   −
@@ -154,19 +183,30 @@ export function ShortlistTable({
               )}
               <Button
                 size="sm"
-                variant={rev ? "primary" : "ghost"}
+                variant={rev ? "secondary" : "outline"}
                 type="button"
+                className="h-8 gap-1 px-2 text-xs"
                 onClick={() => onToggleManualReview(id)}
+                aria-pressed={rev}
               >
-                !
+                <Flag className="h-3.5 w-3.5 sm:hidden" />
+                <span className="hidden sm:inline">⚑ {t("btn_mark_flag")}</span>
               </Button>
             </div>
           );
         },
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [expanded, lang, manualReviewIds, shortlistIds, pagination.pageIndex]
+    [
+      expanded,
+      manualReviewIds,
+      onAdd,
+      onRemoveByApplicantId,
+      onToggleManualReview,
+      pagination.pageIndex,
+      shortlistIds,
+      t,
+    ]
   );
 
   const table = useReactTable({
@@ -182,8 +222,8 @@ export function ShortlistTable({
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-12 text-center text-sm text-muted">
-        Нет заявок по выбранным фильтрам
+      <div className="rounded-[12px] border border-dashed border-border p-12 text-center text-sm text-muted-fg">
+        {t("shortlist_no_rows")}
       </div>
     );
   }
@@ -193,15 +233,15 @@ export function ShortlistTable({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
-          <thead className="bg-navy-900/90 text-slate-200 dark:bg-navy-950">
+      <div className="overflow-x-auto rounded-[12px] border border-border bg-card shadow-card">
+        <table className="w-full min-w-[1100px] border-collapse text-left text-sm text-foreground">
+          <thead className="border-b border-border bg-accent">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((h) => (
                   <th
                     key={h.id}
-                    className="whitespace-nowrap px-3 py-3 font-semibold"
+                    className="whitespace-nowrap px-3 py-3 text-xs font-semibold text-muted-fg"
                     onClick={h.column.getToggleSortingHandler()}
                     style={{ cursor: h.column.getCanSort() ? "pointer" : "default" }}
                   >
@@ -224,7 +264,11 @@ export function ShortlistTable({
               const isOpen = expanded[id] ?? false;
               return (
                 <Fragment key={row.id}>
-                  <tr className="border-b border-border/80 hover:bg-black/[0.02] dark:hover:bg-white/[0.03]">
+                  <tr
+                    className="cursor-pointer border-b border-border/80 transition-colors hover:bg-accent"
+                    title={t("shortlist_row_tip")}
+                    onClick={() => setExpanded((e) => ({ ...e, [id]: !e[id] }))}
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="px-3 py-2 align-middle">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -232,12 +276,9 @@ export function ShortlistTable({
                     ))}
                   </tr>
                   {isOpen && (
-                    <tr className="bg-navy-900/5 dark:bg-black/25">
-                      <td colSpan={columns.length} className="px-6 py-4">
-                        <ApplicationExpandPanel
-                          row={row.original}
-                          motionLayout={false}
-                        />
+                    <tr className="bg-accent">
+                      <td colSpan={columns.length} className="px-4 py-4">
+                        <ShortlistBreakdownPanel row={row.original} />
                       </td>
                     </tr>
                   )}
@@ -248,10 +289,12 @@ export function ShortlistTable({
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-        <p className="text-muted">
-          Всего: <span className="font-mono text-foreground">{rows.length.toLocaleString("ru-RU")}</span>{" "}
+        <p className="text-muted-fg">
+          Всего:{" "}
+          <span className="font-mono font-medium text-foreground">
+            {rows.length.toLocaleString("ru-RU")}
+          </span>{" "}
           · Страница{" "}
           <span className="font-mono text-foreground">{pageIdx + 1}</span> из{" "}
           <span className="font-mono text-foreground">{pageCount}</span>
@@ -280,7 +323,7 @@ export function ShortlistTable({
 
           {getPageNumbers(pageIdx, pageCount).map((p, i) =>
             p === "…" ? (
-              <span key={`e${i}`} className="px-1 text-muted">
+              <span key={`e${i}`} className="px-1 text-muted-fg">
                 …
               </span>
             ) : (

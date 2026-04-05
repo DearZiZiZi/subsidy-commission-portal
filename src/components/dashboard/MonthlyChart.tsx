@@ -16,6 +16,14 @@ import { useI18n } from "@/providers/i18n-provider";
 import { useMounted } from "@/hooks/useMounted";
 import { Skeleton } from "@/components/ui/Skeleton";
 
+const tooltipStyle = {
+  background: "#ffffff",
+  border: "1px solid #E8EAED",
+  borderRadius: 8,
+  fontSize: 12,
+  fontFamily: "var(--font-inter), system-ui, sans-serif",
+} as const;
+
 export function MonthlyChart({ rows }: { rows: ApplicantPortfolioRow[] }) {
   const mounted = useMounted();
   const { t } = useI18n();
@@ -32,7 +40,7 @@ export function MonthlyChart({ rows }: { rows: ApplicantPortfolioRow[] }) {
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted">
+      <div className="flex h-64 items-center justify-center rounded-[12px] border border-dashed border-[#E8EAED] text-sm text-[#8E8E93]">
         {t("empty_charts")}
       </div>
     );
@@ -43,24 +51,19 @@ export function MonthlyChart({ rows }: { rows: ApplicantPortfolioRow[] }) {
   }
 
   return (
-    <div className="min-h-[280px] w-full min-w-0" style={{ height: 280 }}>
+    <div className="min-h-[280px] w-full min-w-0 rounded-[12px] bg-white" style={{ height: 280 }}>
       <ResponsiveContainer>
         <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-          <XAxis dataKey="month" tick={{ fill: "var(--muted)", fontSize: 11 }} />
-          <YAxis allowDecimals={false} tick={{ fill: "var(--muted)", fontSize: 11 }} />
-          <Tooltip
-            contentStyle={{
-              background: "var(--card)",
-              border: "1px solid var(--border)",
-            }}
-          />
+          <CartesianGrid stroke="#F2F2F7" strokeDasharray="3 3" />
+          <XAxis dataKey="month" tick={{ fill: "#8E8E93", fontSize: 12 }} />
+          <YAxis allowDecimals={false} tick={{ fill: "#8E8E93", fontSize: 12 }} />
+          <Tooltip contentStyle={tooltipStyle} />
           <Line
             type="monotone"
             dataKey="applications"
-            stroke="#f59e0b"
+            stroke="#5856D6"
             strokeWidth={2}
-            dot={{ r: 3, fill: "#fbbf24" }}
+            dot={{ r: 3, fill: "#5856D6" }}
           />
         </LineChart>
       </ResponsiveContainer>

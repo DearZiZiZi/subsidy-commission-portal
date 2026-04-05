@@ -6,12 +6,11 @@ import { useMemo } from "react";
 import { useI18n } from "@/providers/i18n-provider";
 import { cn } from "@/lib/utils";
 
-function heatColor(avg: number): string {
-  const t = Math.min(1, Math.max(0, (avg - 30) / 55));
-  const r = Math.round(239 + (34 - 239) * t);
-  const g = Math.round(68 + (197 - 68) * t);
-  const b = Math.round(68 + (94 - 68) * t);
-  return `rgb(${r},${g},${b})`;
+function accentForAvg(avg: number): string {
+  if (avg >= 75) return "#34C759";
+  if (avg >= 60) return "#007AFF";
+  if (avg >= 45) return "#FF9500";
+  return "#FF3B30";
 }
 
 export function RegionalGrid({ rows }: { rows: ApplicantPortfolioRow[] }) {
@@ -33,7 +32,7 @@ export function RegionalGrid({ rows }: { rows: ApplicantPortfolioRow[] }) {
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted">
+      <div className="flex h-48 items-center justify-center rounded-[12px] border border-dashed border-[#E8EAED] text-sm text-[#8E8E93]">
         {t("empty_charts")}
       </div>
     );
@@ -44,21 +43,23 @@ export function RegionalGrid({ rows }: { rows: ApplicantPortfolioRow[] }) {
       {REGIONS.map((region) => {
         const avg = cellMap.get(region);
         const display = avg !== undefined ? avg.toFixed(1) : "—";
-        const bg =
-          avg !== undefined ? heatColor(avg) : "rgba(148,163,184,0.15)";
+        const accent =
+          avg !== undefined ? accentForAvg(avg) : "transparent";
         return (
           <div
             key={region}
             className={cn(
-              "rounded-lg border border-border/60 p-3 text-center transition-shadow",
-              avg !== undefined && "shadow-inner"
+              "rounded-[12px] border border-[#E8EAED] bg-white p-3 text-center shadow-card"
             )}
-            style={{ backgroundColor: bg }}
           >
-            <p className="text-[10px] font-medium leading-tight text-navy-950 dark:text-navy-950">
+            <div
+              className="mx-auto mb-2 h-1 w-8 rounded-full"
+              style={{ backgroundColor: accent }}
+            />
+            <p className="text-[10px] font-medium leading-tight text-[#3C3C43]">
               {region}
             </p>
-            <p className="mt-2 font-mono text-lg font-semibold text-navy-950">
+            <p className="mt-2 text-lg font-bold tabular-nums tracking-tight text-[#1C1C1E]">
               {display}
             </p>
           </div>

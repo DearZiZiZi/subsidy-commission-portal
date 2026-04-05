@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { useI18n } from "@/providers/i18n-provider";
 import { ScoringMethodologySection } from "@/components/dashboard/ScoringMethodologySection";
+import { METHODOLOGY_README_EMBED } from "@/data/methodology-readme-embed";
 
 export default function MethodologyPage() {
   const { t } = useI18n();
@@ -31,23 +32,79 @@ export default function MethodologyPage() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <h1 className="text-2xl font-bold tracking-tight">
+      <h1 className="text-2xl font-bold tracking-tight text-[#1C1C1E]">
         {t("methodology_title")}
       </h1>
 
-      {/* Техническая методология: архитектура, веса, нормализация, источники */}
       <ScoringMethodologySection />
 
-      {/* Интерактивный калькулятор */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("methodology_prep_title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm leading-relaxed text-[#3C3C43]">
+          <p>{t("methodology_prep_p1")}</p>
+          <p>{t("methodology_prep_p2")}</p>
+          <p>{t("methodology_prep_p3")}</p>
+          <p>{t("methodology_prep_p4")}</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("methodology_validation_title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm leading-relaxed text-[#3C3C43]">
+          <p>{t("methodology_validation_p1")}</p>
+          <p>{t("methodology_validation_p2")}</p>
+          <p className="text-xs text-[#8E8E93]">
+            {t("methodology_validation_table_caption")}
+          </p>
+          <div className="overflow-x-auto rounded-[12px] border border-[#E8EAED]">
+            <table className="w-full min-w-[320px] text-left text-xs">
+              <thead className="border-b border-[#E8EAED] bg-[#F7F8FA]">
+                <tr>
+                  <th className="px-3 py-2 font-semibold text-[#8E8E93]">#</th>
+                  <th className="px-3 py-2 font-semibold text-[#8E8E93]">
+                    Топ по скорингу
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-[#8E8E93]">
+                    Топ по сумме
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="font-mono text-[#1C1C1E]">
+                {[
+                  ["1", "A-скоринг", "B-сумма"],
+                  ["2", "C-скоринг", "D-сумма"],
+                  ["3", "E-скоринг", "F-сумма"],
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-[#E8EAED]/80">
+                    <td className="px-3 py-2">{row[0]}</td>
+                    <td className="px-3 py-2">{row[1]}</td>
+                    <td className="px-3 py-2">{row[2]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-[#8E8E93]">
+            Иллюстрация: пересечение наборов неполное — высокая сумма не гарантирует
+            высокий мерит-балл.
+          </p>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Интерактивная модель (v2)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm leading-relaxed">
-          <p>
-            Двигайте компоненты и переключайте штраф/бонус, чтобы увидеть как
+          <p className="text-[#3C3C43]">
+            Двигайте компоненты и переключайте штраф/бонус, чтобы увидеть, как
             формируется итоговый балл.
           </p>
+          <p className="text-xs text-[#8E8E93]">{t("methodology_component_note")}</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1">
               <span>Стратегия (Госплан)</span>
@@ -121,23 +178,34 @@ export default function MethodologyPage() {
             />
             Сезонный бонус овцеводства (янв–апр): +7
           </label>
-          <div className="rounded-lg border border-border bg-card/80 p-4 font-mono text-sm">
+          <div className="rounded-[12px] border border-[#E8EAED] bg-[#F7F8FA] p-4 font-mono text-sm">
             <p>BASE = {base.toFixed(1)}</p>
             <p>Штраф = {penAmt.toFixed(1)}</p>
             <p>Бонус = {bonAmt.toFixed(1)}</p>
-            <p className="mt-2 text-gold-500">
-              FINAL = {final.toFixed(1)}
-            </p>
+            <p className="mt-2 font-bold text-[#5856D6]">FINAL = {final.toFixed(1)}</p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Компоненты и ограничения */}
+      <details className="group rounded-[12px] border border-[#E8EAED] bg-white shadow-card open:shadow-card-hover">
+        <summary className="cursor-pointer list-none px-5 py-4 text-base font-semibold text-[#1C1C1E] marker:hidden [&::-webkit-details-marker]:hidden">
+          <span className="inline-flex items-center gap-2">
+            {t("methodology_run_title")}
+            <span className="text-xs font-normal text-[#8E8E93]">(нажмите, чтобы развернуть)</span>
+          </span>
+        </summary>
+        <div className="border-t border-[#E8EAED] px-5 py-4">
+          <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap rounded-lg bg-[#F7F8FA] p-4 font-mono text-[11px] leading-relaxed text-[#3C3C43]">
+            {METHODOLOGY_README_EMBED}
+          </pre>
+        </div>
+      </details>
+
       <Card>
         <CardHeader>
           <CardTitle>Компоненты и ограничения</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm leading-relaxed text-muted">
+        <CardContent className="space-y-3 text-sm leading-relaxed text-[#3C3C43]">
           <p>
             Технологический уровень оценивается эвристикой по тексту цели
             субсидирования (ключевые слова: генетика, импорт, производство,

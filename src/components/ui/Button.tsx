@@ -2,7 +2,7 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost" | "outline";
+  variant?: "primary" | "secondary" | "ghost" | "outline" | "destructive";
   size?: "sm" | "md" | "lg";
 }
 
@@ -16,18 +16,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center justify-center gap-2 rounded-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
           variant === "primary" &&
-            "bg-gold-500 text-navy-950 hover:bg-gold-400 dark:text-navy-950",
+            "bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200",
           variant === "secondary" &&
-            "bg-navy-700 text-white hover:bg-navy-600 dark:bg-navy-800",
+            "bg-accent text-foreground hover:bg-border/40 dark:hover:bg-white/10",
           variant === "ghost" &&
-            "bg-transparent hover:bg-black/5 dark:hover:bg-white/10",
+            "bg-transparent text-foreground hover:bg-accent",
           variant === "outline" &&
-            "border border-gold-500/50 bg-transparent text-foreground hover:bg-gold-500/10",
-          size === "sm" && "h-8 px-3 text-sm",
+            "border border-border bg-card text-foreground hover:bg-accent",
+          variant === "destructive" &&
+            "bg-[#FF3B30] text-white hover:bg-[#E6352B]",
+          size === "sm" && "h-8 px-3 text-xs",
           size === "md" && "h-10 px-4 text-sm",
-          size === "lg" && "h-12 px-6 text-base",
+          size === "lg" && "min-h-12 px-5 py-3 text-base",
           className
         )}
         {...props}

@@ -24,7 +24,15 @@ const BUCKETS = [
   { label: "80–100", min: 80, max: 100 },
 ];
 
-const COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
+const COLORS = ["#FF3B30", "#FF9500", "#FF9500", "#007AFF", "#34C759"];
+
+const tooltipStyle = {
+  background: "#ffffff",
+  border: "1px solid #E8EAED",
+  borderRadius: 8,
+  fontSize: 12,
+  fontFamily: "var(--font-inter), system-ui, sans-serif",
+} as const;
 
 export function ScoreDistribution({ rows }: { rows: ApplicantPortfolioRow[] }) {
   const mounted = useMounted();
@@ -33,8 +41,7 @@ export function ScoreDistribution({ rows }: { rows: ApplicantPortfolioRow[] }) {
     const counts = BUCKETS.map(() => 0);
     for (const r of rows) {
       const s = r.final_score_100;
-      const idx =
-        s <= 20 ? 0 : s <= 40 ? 1 : s <= 60 ? 2 : s <= 80 ? 3 : 4;
+      const idx = s <= 20 ? 0 : s <= 40 ? 1 : s <= 60 ? 2 : s <= 80 ? 3 : 4;
       counts[idx] += 1;
     }
     return BUCKETS.map((b, i) => ({
@@ -46,7 +53,7 @@ export function ScoreDistribution({ rows }: { rows: ApplicantPortfolioRow[] }) {
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted">
+      <div className="flex h-64 items-center justify-center rounded-[12px] border border-dashed border-[#E8EAED] text-sm text-[#8E8E93]">
         {t("empty_charts")}
       </div>
     );
@@ -57,19 +64,14 @@ export function ScoreDistribution({ rows }: { rows: ApplicantPortfolioRow[] }) {
   }
 
   return (
-    <div className="min-h-[280px] w-full min-w-0" style={{ height: 280 }}>
+    <div className="min-h-[280px] w-full min-w-0 rounded-[12px] bg-white" style={{ height: 280 }}>
       <ResponsiveContainer>
         <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-          <XAxis dataKey="name" tick={{ fill: "var(--muted)", fontSize: 11 }} />
-          <YAxis allowDecimals={false} tick={{ fill: "var(--muted)", fontSize: 11 }} />
-          <Tooltip
-            contentStyle={{
-              background: "var(--card)",
-              border: "1px solid var(--border)",
-            }}
-          />
-          <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+          <CartesianGrid stroke="#F2F2F7" strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="name" tick={{ fill: "#8E8E93", fontSize: 12 }} />
+          <YAxis allowDecimals={false} tick={{ fill: "#8E8E93", fontSize: 12 }} />
+          <Tooltip contentStyle={tooltipStyle} />
+          <Bar dataKey="count" radius={[6, 6, 0, 0]}>
             {data.map((entry, index) => (
               <Cell key={`c-${index}`} fill={entry.fill} />
             ))}

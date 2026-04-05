@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { BudgetTracker } from "@/components/shortlist/BudgetTracker";
+import { CommissionBudgetPicker } from "@/components/shortlist/CommissionBudgetPicker";
 import { ShortlistTable } from "@/components/shortlist/ShortlistTable";
 import { getDashboardDataset } from "@/data/sample-results";
 import {
@@ -75,10 +76,10 @@ export default function ShortlistPage() {
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             {t("shortlist_title")}
           </h1>
-          <p className="mt-1 text-sm text-muted">{t("table_pool")}</p>
+          <p className="mt-1 text-sm text-muted-fg">{t("table_pool")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -93,7 +94,7 @@ export default function ShortlistPage() {
             variant="outline"
             onClick={() => {
               void downloadCommissionPdf(shortlist, budgetTotal, lang)
-                .then(() => toast.success("PDF сформирован"))
+                .then(() => toast.success(t("toast_pdf_commission_ok")))
                 .catch((e: unknown) =>
                   toast.error(
                     e instanceof Error ? e.message : "Ошибка экспорта PDF"
@@ -121,7 +122,7 @@ export default function ShortlistPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div>
-              <p className="mb-2 text-xs uppercase text-muted">{t("filter_direction")}</p>
+              <p className="mb-2 text-xs uppercase text-muted-fg">{t("filter_direction")}</p>
               <div className="max-h-40 space-y-1 overflow-y-auto">
                 {DIRECTIONS.map((d) => (
                   <label key={d} className="flex items-center gap-2">
@@ -142,7 +143,7 @@ export default function ShortlistPage() {
               </div>
             </div>
             <div>
-              <p className="mb-2 text-xs uppercase text-muted">{t("filter_region")}</p>
+              <p className="mb-2 text-xs uppercase text-muted-fg">{t("filter_region")}</p>
               <div className="max-h-40 space-y-1 overflow-y-auto">
                 {REGIONS.map((r) => (
                   <label key={r} className="flex items-center gap-2">
@@ -163,7 +164,7 @@ export default function ShortlistPage() {
               </div>
             </div>
             <div>
-              <p className="mb-2 text-xs uppercase text-muted">{t("filter_score")}</p>
+              <p className="mb-2 text-xs uppercase text-muted-fg">{t("filter_score")}</p>
               <div className="flex gap-2">
                 <Input
                   type="number"
@@ -184,7 +185,7 @@ export default function ShortlistPage() {
               </div>
             </div>
             <div>
-              <p className="mb-2 text-xs uppercase text-muted">{t("filter_month")}</p>
+              <p className="mb-2 text-xs uppercase text-muted-fg">{t("filter_month")}</p>
               <select
                 className="w-full rounded-lg border border-border bg-card px-2 py-2 text-sm"
                 value={filters.month ?? ""}
@@ -194,7 +195,7 @@ export default function ShortlistPage() {
                   })
                 }
               >
-                <option value="">Все</option>
+                <option value="">{t("filter_all_months")}</option>
                 {Array.from({ length: 12 }, (_, i) => (
                   <option key={i + 1} value={i + 1}>
                     {i + 1}
@@ -203,7 +204,7 @@ export default function ShortlistPage() {
               </select>
             </div>
             <div>
-              <p className="mb-2 text-xs uppercase text-muted">{t("filter_top")}</p>
+              <p className="mb-2 text-xs uppercase text-muted-fg">{t("filter_top")}</p>
               <select
                 className="w-full rounded-lg border border-border bg-card px-2 py-2 text-sm"
                 value={filters.topN}
@@ -220,7 +221,7 @@ export default function ShortlistPage() {
               </select>
             </div>
             <Button type="button" variant="ghost" onClick={resetFilters}>
-              Сбросить
+              {t("reset_filters")}
             </Button>
           </CardContent>
         </Card>
@@ -238,18 +239,16 @@ export default function ShortlistPage() {
             </Button>
           )}
 
-          <BudgetTracker total={budgetTotal} allocated={budgetAllocated()} />
-          <div className="flex flex-wrap items-end gap-4 rounded-xl border border-border bg-card p-4">
-            <div>
-              <label className="text-xs text-muted">{t("budget_total")}</label>
-              <Input
-                type="number"
-                className="mt-1 w-56 font-mono"
-                value={budgetTotal}
-                onChange={(e) => setBudgetTotal(Number(e.target.value) || 0)}
-              />
-            </div>
-          </div>
+          <CommissionBudgetPicker
+            budgetTotal={budgetTotal}
+            onChangeTotal={setBudgetTotal}
+          />
+
+          <BudgetTracker
+            total={budgetTotal}
+            allocated={budgetAllocated()}
+            onChangeTotal={setBudgetTotal}
+          />
 
           <div className="flex flex-wrap gap-2">
             <Button
@@ -277,7 +276,6 @@ export default function ShortlistPage() {
 
           <ShortlistTable
             rows={pool}
-            lang={lang}
             shortlistIds={shortlistIds}
             onAdd={addToShortlist}
             onRemoveByApplicantId={removeByApplicantId}
@@ -305,7 +303,7 @@ export default function ShortlistPage() {
                 type="button"
                 onClick={() => {
                   void downloadCommissionPdf(shortlist, budgetTotal, lang)
-                    .then(() => toast.success("PDF сформирован"))
+                    .then(() => toast.success(t("toast_pdf_commission_ok")))
                     .catch((e: unknown) =>
                       toast.error(
                         e instanceof Error ? e.message : "Ошибка экспорта PDF"

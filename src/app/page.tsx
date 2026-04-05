@@ -7,29 +7,17 @@ import { ScoreDistribution } from "@/components/dashboard/ScoreDistribution";
 import { DirectionChart } from "@/components/dashboard/DirectionChart";
 import { RegionalGrid } from "@/components/dashboard/RegionalGrid";
 import { MonthlyChart } from "@/components/dashboard/MonthlyChart";
-
-import { getDashboardDataset, PORTFOLIO_STATS } from "@/data/sample-results";
+import { getDashboardDataset } from "@/data/sample-results";
 import { useI18n } from "@/providers/i18n-provider";
-import { isDemoMode } from "@/lib/api";
 import { motion } from "framer-motion";
+import { computePortfolioKpis, formatBillionsKZT } from "@/lib/score-utils";
+import { ArrowRight, FileText, Gauge, Layers } from "lucide-react";
 
 export default function DashboardPage() {
   const { t } = useI18n();
   const rows = useMemo(() => getDashboardDataset(), []);
 
-  const kpis = useMemo(() => {
-    const n = PORTFOLIO_STATS.rowCount;
-    const sumAmt = PORTFOLIO_STATS.totalAmount;
-    const avg = PORTFOLIO_STATS.avgScore;
-    const forecast = PORTFOLIO_STATS.forecastAbove60Pct;
-    return {
-      n,
-      sumAmt,
-      avg,
-      forecast,
-      billions: sumAmt / 1_000_000_000,
-    };
-  }, []);
+  const kpis = useMemo(() => computePortfolioKpis(rows), [rows]);
 
   return (
     <motion.div
@@ -38,37 +26,36 @@ export default function DashboardPage() {
       transition={{ duration: 0.35 }}
       className="space-y-6"
     >
-      {isDemoMode() && (
-        <div className="rounded-lg border border-gold-500/30 bg-gold-500/10 px-4 py-2 text-center text-xs text-foreground">
-          {t("demo_banner")}
-        </div>
-      )}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-[#1C1C1E]">
           {t("nav_dashboard")}
         </h1>
-        <p className="mt-1 text-sm text-muted">
-          Полный портфель: {PORTFOLIO_STATS.rowCount.toLocaleString("ru-RU")} успешных
-          заявок за 2025–2026 гг.
-        </p>
+        <p className="mt-1 text-sm text-[#8E8E93]">{t("dashboard_subtitle")}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KPICard title={t("kpi_applications")} value={kpis.n} />
+        <KPICard
+          title={t("kpi_applications")}
+          value={kpis.n}
+          dotClassName="bg-[#007AFF]"
+        />
         <KPICard
           title={t("kpi_amount")}
-          value={kpis.billions}
-          decimals={2}
-          suffix="млрд ₸"
-          mono
+          valueText={formatBillionsKZT(kpis.totalAmount)}
+          dotClassName="bg-[#34C759]"
         />
-        <KPICard title={t("kpi_avg_score")} value={kpis.avg} decimals={1} mono />
+        <KPICard
+          title={t("kpi_avg_score")}
+          value={kpis.avgScore}
+          decimals={1}
+          dotClassName="bg-[#5856D6]"
+        />
         <KPICard
           title={t("kpi_forecast")}
-          value={kpis.forecast}
+          value={kpis.forecastAbove60Pct}
           decimals={1}
           suffix="%"
-          mono
+          dotClassName="bg-[#FF9500]"
         />
       </div>
 
@@ -111,28 +98,72 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("legend_title")}</CardTitle>
+          <CardTitle>{t("scoring_how_title")}</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
-          <p>
-            <span className="inline-block h-2 w-2 rounded-full bg-score-green" />{" "}
-            80–100: РЕКОМЕНДОВАНО
-          </p>
-          <p>
-            <span className="inline-block h-2 w-2 rounded-full bg-yellow-500" />{" "}
-            60–79: НА РАССМОТРЕНИИ
-          </p>
-          <p>
-            <span className="inline-block h-2 w-2 rounded-full bg-orange-500" />{" "}
-            40–59: ТРЕБУЕТ ПРОВЕРКИ
-          </p>
-          <p>
-            <span className="inline-block h-2 w-2 rounded-full bg-score-red" />{" "}
-            0–39: НИЗКИЙ ПРИОРИТЕТ
-          </p>
+        <CardContent>
+          <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-1 items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F2F2F7] text-[#1C1C1E]">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-[#8E8E93]">1</p>
+                <p className="text-sm font-medium text-[#1C1C1E]">
+                  {t("scoring_step_1")}
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="hidden h-5 w-5 shrink-0 text-[#C7C7CC] sm:block" />
+            <div className="flex flex-1 items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F2F2F7] text-[#1C1C1E]">
+                <Layers className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-[#8E8E93]">2</p>
+                <p className="text-sm font-medium text-[#1C1C1E]">
+                  {t("scoring_step_2")}
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="hidden h-5 w-5 shrink-0 text-[#C7C7CC] sm:block" />
+            <div className="flex flex-1 items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F2F2F7] text-[#1C1C1E]">
+                <Gauge className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-[#8E8E93]">3</p>
+                <p className="text-sm font-medium text-[#1C1C1E]">
+                  {t("scoring_step_3")}
+                </p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("legend_title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
+          <p className="flex items-center gap-2 text-[#3C3C43]">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#34C759]" />
+            {t("legend_tier_rec")}
+          </p>
+          <p className="flex items-center gap-2 text-[#3C3C43]">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#FF9500]" />
+            {t("legend_tier_rev")}
+          </p>
+          <p className="flex items-center gap-2 text-[#3C3C43]">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#F57F17]" />
+            {t("legend_tier_ver")}
+          </p>
+          <p className="flex items-center gap-2 text-[#3C3C43]">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#FF3B30]" />
+            {t("legend_tier_low")}
+          </p>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }

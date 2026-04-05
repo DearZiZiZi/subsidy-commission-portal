@@ -2,52 +2,67 @@
 
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useAnimatedScalar } from "@/hooks/useCountUp";
 import { cn } from "@/lib/utils";
 
 export function KPICard({
   title,
   value,
+  valueText,
   decimals = 0,
   suffix,
   loading,
-  mono,
+  dotClassName,
   className,
 }: {
   title: string;
-  value: number;
+  /** Число для отображения (если не задано valueText) */
+  value?: number;
+  /** Готовая строка (например млрд ₸) */
+  valueText?: string;
   decimals?: number;
   suffix?: string;
   loading?: boolean;
-  mono?: boolean;
+  dotClassName?: string;
   className?: string;
 }) {
-  const display = useAnimatedScalar(value, decimals);
+  const display =
+    valueText ??
+    (value !== undefined
+      ? decimals > 0
+        ? value.toLocaleString("ru-RU", {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+          })
+        : value.toLocaleString("ru-RU")
+      : "—");
 
   return (
     <Card className={cn("overflow-hidden", className)}>
-      <CardContent className="p-5">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted">{title}</p>
-        {loading ? (
-          <Skeleton className="mt-3 h-10 w-32" />
-        ) : (
-          <p
-            className={cn(
-              "mt-2 text-3xl font-semibold tracking-tight text-foreground",
-              mono && "font-mono"
+      <CardContent className="flex gap-4 p-5">
+        <div
+          className={cn(
+            "mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#007AFF]",
+            dotClassName
+          )}
+          aria-hidden
+        />
+        <div className="min-w-0 flex-1">
+          <p className="text-[32px] font-bold leading-none tracking-tight text-[#1C1C1E]">
+            {loading ? (
+              <Skeleton className="inline-block h-9 w-28" />
+            ) : (
+              <>
+                {display}
+                {suffix ? (
+                  <span className="ml-1 text-lg font-semibold text-[#8E8E93]">
+                    {suffix}
+                  </span>
+                ) : null}
+              </>
             )}
-          >
-            {decimals > 0
-              ? display.toLocaleString("ru-RU", {
-                  minimumFractionDigits: decimals,
-                  maximumFractionDigits: decimals,
-                })
-              : display.toLocaleString("ru-RU")}
-            {suffix ? (
-              <span className="ml-1 text-lg font-normal text-muted">{suffix}</span>
-            ) : null}
           </p>
-        )}
+          <p className="mt-2 text-[13px] text-[#8E8E93]">{title}</p>
+        </div>
       </CardContent>
     </Card>
   );

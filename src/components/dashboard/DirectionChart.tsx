@@ -3,6 +3,7 @@
 import {
   Bar,
   BarChart,
+  CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -13,6 +14,14 @@ import { useMemo } from "react";
 import { useI18n } from "@/providers/i18n-provider";
 import { useMounted } from "@/hooks/useMounted";
 import { Skeleton } from "@/components/ui/Skeleton";
+
+const tooltipStyle = {
+  background: "#ffffff",
+  border: "1px solid #E8EAED",
+  borderRadius: 8,
+  fontSize: 12,
+  fontFamily: "var(--font-inter), system-ui, sans-serif",
+} as const;
 
 export function DirectionChart({ rows }: { rows: ApplicantPortfolioRow[] }) {
   const mounted = useMounted();
@@ -35,7 +44,7 @@ export function DirectionChart({ rows }: { rows: ApplicantPortfolioRow[] }) {
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-72 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted">
+      <div className="flex h-72 items-center justify-center rounded-[12px] border border-dashed border-[#E8EAED] text-sm text-[#8E8E93]">
         {t("empty_charts")}
       </div>
     );
@@ -46,31 +55,26 @@ export function DirectionChart({ rows }: { rows: ApplicantPortfolioRow[] }) {
   }
 
   return (
-    <div className="min-h-[320px] w-full min-w-0" style={{ height: 320 }}>
+    <div className="min-h-[320px] w-full min-w-0 rounded-[12px] bg-white" style={{ height: 320 }}>
       <ResponsiveContainer>
         <BarChart
           data={data}
           layout="vertical"
           margin={{ top: 8, right: 16, left: 8, bottom: 8 }}
         >
-          <XAxis type="number" domain={[0, 100]} tick={{ fill: "var(--muted)", fontSize: 11 }} />
+          <CartesianGrid stroke="#F2F2F7" strokeDasharray="3 3" horizontal={false} />
+          <XAxis type="number" domain={[0, 100]} tick={{ fill: "#8E8E93", fontSize: 12 }} />
           <YAxis
             type="category"
             dataKey="name"
             width={140}
-            tick={{ fill: "var(--muted)", fontSize: 10 }}
+            tick={{ fill: "#8E8E93", fontSize: 11 }}
           />
           <Tooltip
-            formatter={(v) => [
-              `${Number(v ?? 0).toFixed(1)}`,
-              "средний балл",
-            ]}
-            contentStyle={{
-              background: "var(--card)",
-              border: "1px solid var(--border)",
-            }}
+            formatter={(v) => [`${Number(v ?? 0).toFixed(1)}`, "средний балл"]}
+            contentStyle={tooltipStyle}
           />
-          <Bar dataKey="avg" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={18} />
+          <Bar dataKey="avg" fill="#007AFF" radius={[0, 6, 6, 0]} barSize={18} />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -1,5 +1,6 @@
 import {
   COMPONENT_KEYS,
+  type ApplicantPortfolioRow,
   type ComponentBreakdown,
   type ScoreTier,
 } from "@/types/scoring";
@@ -27,29 +28,36 @@ export function getTier(score: number): ScoreTier {
   return "low";
 }
 
+/** Цвет полосы компонента: ≥16 зелёный, ≥10 янтарь, иначе красный */
+export function componentBarColor(value: number): string {
+  if (value >= 16) return "#34C759";
+  if (value >= 10) return "#FF9500";
+  return "#FF3B30";
+}
+
 export function tierColorClass(tier: ScoreTier): string {
   switch (tier) {
     case "recommended":
-      return "text-score-green bg-score-green/15 border-score-green/40";
+      return "bg-[#E8F5E9] text-[#1B5E20]";
     case "review":
-      return "text-yellow-500 bg-yellow-500/15 border-yellow-500/40";
+      return "bg-[#FFF3E0] text-[#E65100]";
     case "verify":
-      return "text-orange-500 bg-orange-500/15 border-orange-500/40";
+      return "bg-[#FFF8E1] text-[#F57F17]";
     default:
-      return "text-score-red bg-score-red/15 border-score-red/40";
+      return "bg-[#FFEBEE] text-[#B71C1C]";
   }
 }
 
 export function tierHex(tier: ScoreTier): string {
   switch (tier) {
     case "recommended":
-      return "#22c55e";
+      return "#34C759";
     case "review":
-      return "#eab308";
+      return "#FF9500";
     case "verify":
-      return "#f97316";
+      return "#FF9500";
     default:
-      return "#ef4444";
+      return "#FF3B30";
   }
 }
 
@@ -86,4 +94,39 @@ export function makeExplanation(
 
 export function orderedComponentValues(breakdown: ComponentBreakdown): number[] {
   return COMPONENT_KEYS.map((k) => breakdown[k]);
+}
+
+export function computePortfolioKpis(rows: ApplicantPortfolioRow[]): {
+  n: number;
+  totalAmount: number;
+  avgScore: number;
+  forecastAbove60Pct: number;
+  billions: number;
+} {
+  const n = rows.length;
+  if (n === 0) {
+    return {
+      n: 0,
+      totalAmount: 0,
+      avgScore: 0,
+      forecastAbove60Pct: 0,
+      billions: 0,
+    };
+  }
+  let totalAmount = 0;
+  let sumScore = 0;
+  let above60 = 0;
+  for (let i = 0; i < n; i++) {
+    const r = rows[i];
+    totalAmount += r.requested_amount;
+    sumScore += r.final_score_100;
+    if (r.final_score_100 > 60) above60 += 1;
+  }
+  return {
+    n,
+    totalAmount,
+    avgScore: Math.round((sumScore / n) * 1000) / 1000,
+    forecastAbove60Pct: Math.round((above60 / n) * 10000) / 100,
+    billions: totalAmount / 1_000_000_000,
+  };
 }

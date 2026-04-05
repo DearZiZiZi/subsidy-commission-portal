@@ -13,6 +13,7 @@ import { COMPONENT_KEYS } from "@/types/scoring";
 import { useMemo } from "react";
 import { useMounted } from "@/hooks/useMounted";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { motion } from "framer-motion";
 
 const LABELS_RU: Record<string, string> = {
   "Стратегический приоритет (Госплан)": "Госплан",
@@ -25,11 +26,18 @@ const LABELS_RU: Record<string, string> = {
 export function ComponentRadar({
   breakdown,
   className,
+  compact,
+  animateIn,
 }: {
   breakdown: ComponentBreakdown;
   className?: string;
+  /** Компактный радар (~180px) для шортлиста */
+  compact?: boolean;
+  /** Плавное появление (страница оценки) */
+  animateIn?: boolean;
 }) {
   const mounted = useMounted();
+  const height = compact ? 180 : 280;
   const data = useMemo(
     () =>
       COMPONENT_KEYS.map((k) => ({
@@ -42,35 +50,64 @@ export function ComponentRadar({
   );
 
   if (!mounted) {
-    return <Skeleton className={className} style={{ height: 280, width: "100%" }} />;
+    return (
+      <Skeleton className={className} style={{ height, width: "100%" }} />
+    );
   }
 
+  const chart = (
+    <ResponsiveContainer>
+      <RadarChart
+        data={data}
+        cx="50%"
+        cy="50%"
+        outerRadius={compact ? "70%" : "75%"}
+      >
+        <PolarGrid stroke="#F2F2F7" />
+        <PolarAngleAxis
+          dataKey="metric"
+          tick={{ fill: "#8E8E93", fontSize: compact ? 9 : 11 }}
+        />
+        <Tooltip
+          contentStyle={{
+            background: "#ffffff",
+            border: "1px solid #E8EAED",
+            borderRadius: 8,
+            fontSize: 12,
+            fontFamily: "var(--font-inter), system-ui, sans-serif",
+          }}
+          formatter={(v) => [`${Number(v ?? 0).toFixed(1)}`, "балл"]}
+          labelFormatter={(_, payload) =>
+            (payload?.[0]?.payload as { full?: string })?.full ?? ""
+          }
+        />
+        <Radar
+          name="Баллы"
+          dataKey="value"
+          stroke="#5856D6"
+          fill="#5856D6"
+          fillOpacity={0.22}
+          strokeWidth={2}
+          dot={{ r: compact ? 2 : 3, fill: "#5856D6" }}
+        />
+      </RadarChart>
+    </ResponsiveContainer>
+  );
+
   return (
-    <div className={className} style={{ width: "100%", height: 280, minWidth: 0 }}>
-      <ResponsiveContainer>
-        <RadarChart data={data} cx="50%" cy="50%" outerRadius="75%">
-          <PolarGrid stroke="rgba(148,163,184,0.35)" />
-          <PolarAngleAxis
-            dataKey="metric"
-            tick={{ fill: "var(--muted)", fontSize: 11 }}
-          />
-          <Tooltip
-            formatter={(v) => [`${Number(v ?? 0).toFixed(1)}`, "балл"]}
-            labelFormatter={(_, payload) =>
-              (payload?.[0]?.payload as { full?: string })?.full ?? ""
-            }
-          />
-          <Radar
-            name="Баллы"
-            dataKey="value"
-            stroke="#f59e0b"
-            fill="#f59e0b"
-            fillOpacity={0.25}
-            strokeWidth={2}
-            dot={{ r: 3, fill: "#fbbf24" }}
-          />
-        </RadarChart>
-      </ResponsiveContainer>
+    <div className={className} style={{ width: "100%", height, minWidth: 0 }}>
+      {animateIn ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.55, duration: 0.45 }}
+          className="h-full w-full"
+        >
+          {chart}
+        </motion.div>
+      ) : (
+        chart
+      )}
     </div>
   );
 }

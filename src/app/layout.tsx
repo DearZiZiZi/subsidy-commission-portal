@@ -1,27 +1,27 @@
 import type { Metadata } from "next";
-import { DM_Sans, DM_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/providers/app-providers";
 import { ShellLayout } from "@/components/layout/ShellLayout";
 
-const dmSans = DM_Sans({
-  subsets: ["latin", "latin-ext"],
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
   weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-dm-sans",
-  display: "swap",
-});
-
-const dmMono = DM_Mono({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500"],
-  variable: "--font-dm-mono",
+  variable: "--font-inter",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "ИС скоринга субсидий животноводства — Merit v2",
+  title: {
+    default: "Дашборд · ИС Субсидий МСХ РК",
+    template: "%s · ИС Субсидий",
+  },
   description:
     "Портал комиссии: скоринг заявок на субсидирование животноводства Республики Казахстан",
+  icons: {
+    icon: "/gerb.jpg",
+    apple: "/gerb.jpg",
+  },
 };
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning>
       <body
-        className={`${dmSans.variable} ${dmMono.variable} min-w-[1280px] font-sans antialiased`}
+        className={`${inter.variable} min-h-screen font-sans antialiased`}
       >
         <AppProviders>
           <ShellLayout>{children}</ShellLayout>

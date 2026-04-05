@@ -16,6 +16,7 @@ import { formatScoreOneDecimal } from "@/lib/score-utils";
 import { downloadBatchResultsXlsx } from "@/lib/excel-export";
 import { useI18n } from "@/providers/i18n-provider";
 import * as XLSX from "xlsx";
+import { ScoreTierBadge } from "@/components/scoring/ScoreTierBadge";
 
 type RowOutcome =
   | { applicant_id: string; final_score_100: number; breakdown: ScoreResult["component_breakdown"] }
@@ -133,6 +134,67 @@ export default function BatchPage() {
       </div>
 
       <CSVUpload onFile={onFile} />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("batch_sample_title")}</CardTitle>
+          <p className="mt-1 text-xs font-normal text-[#8E8E93]">
+            {t("batch_sample_sub")}
+          </p>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <table className="w-full min-w-[480px] text-left text-sm">
+            <thead>
+              <tr className="border-b border-[#E8EAED] text-xs text-[#8E8E93]">
+                <th className="py-2 pr-4 font-medium">ID</th>
+                <th className="py-2 pr-4 font-medium">{t("col_direction")}</th>
+                <th className="py-2 pr-4 font-medium">{t("col_score")}</th>
+                <th className="py-2 font-medium">{t("col_tier")}</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#1C1C1E]">
+              {[
+                {
+                  id: "02200100376504",
+                  dir: "Скотоводство",
+                  score: 90,
+                },
+                {
+                  id: "02200100258550",
+                  dir: "Овцеводство",
+                  score: 89.3,
+                },
+                {
+                  id: "02200100322792",
+                  dir: "Козоводство",
+                  score: 89.4,
+                },
+                {
+                  id: "02200100398555",
+                  dir: "Птицеводство",
+                  score: 89.5,
+                },
+                {
+                  id: "02200100395669",
+                  dir: "Свиноводство",
+                  score: 89.4,
+                },
+              ].map((r) => (
+                <tr key={r.id} className="border-b border-[#E8EAED]/80">
+                  <td className="py-2 pr-4 font-mono text-xs">{r.id}</td>
+                  <td className="py-2 pr-4 text-xs">{r.dir}</td>
+                  <td className="py-2 pr-4 font-mono font-semibold text-[#5856D6]">
+                    {r.score.toFixed(1)}
+                  </td>
+                  <td className="py-2">
+                    <ScoreTierBadge score={r.score} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
 
       {preview.length > 0 && (
         <Card>
